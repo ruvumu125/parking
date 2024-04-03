@@ -22,6 +22,9 @@ public interface AdminRepository extends JpaRepository<Admin, Long> {
 	@Query(value = "select u from Admin u where u.id = :id")
 	Admin findAdminById(@Param("id") Long id);
 
+	@Query(value = "select a from Admin a join User u on a.user.id = u.id where a.adminTypeEnum = 'MAIN_ADMIN' ")
+	List<Admin> findMainAdmins();
+
 
 
 }

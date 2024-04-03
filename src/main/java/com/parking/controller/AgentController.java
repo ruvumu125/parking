@@ -11,23 +11,23 @@ import com.parking.services.AgentService;
 
 @RestController
 public class AgentController implements AgentApi {
-	
+
 	private final AgentService agentService;
-	
+
 	@Autowired
 	public AgentController(AgentService agentService) {
 		this.agentService = agentService;
 	}
-	
+
 	@Override
 	public AgentDto save(AgentDto dto) {
-		
+
 		return agentService.save(dto);
 	}
 
 	@Override
 	public AgentDto findById(Long id) {
-		
+
 		return agentService.findById(id);
 	}
 
@@ -38,9 +38,14 @@ public class AgentController implements AgentApi {
 	}
 
 	@Override
+	public List<AgentDto> findCompanyAgents(Long idCompany) {
+		return agentService.findCompanyAgents(idCompany);
+	}
+
+	@Override
 	public void delete(Long id) {
 		agentService.delete(id);
-		
+
 	}
-	
+
 }

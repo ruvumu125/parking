@@ -2,6 +2,7 @@ package com.parking.model;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -29,10 +30,16 @@ public class Company extends AbstractEntity {
 
 	@Column(name = "iscompanyactive")
 	private Boolean isCompanyActive;
-	
+
 	@OneToMany(mappedBy = "company")
 	private List<Agent> agents;
-	
+
 	@OneToMany(mappedBy = "company")
 	private List<Admin> admins;
+
+	@OneToMany(mappedBy = "company")
+	private List<ParkingSpace> parkingSpaces;
+
+	@OneToMany(mappedBy = "company")
+	private List<ParkingPrice> parkingPrices;
 }
