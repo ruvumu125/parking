@@ -2,7 +2,9 @@ package com.parking.controller.api;
 
 import java.util.List;
 
+import com.parking.dto.AgentDto;
 import com.parking.dto.UserDto;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +40,29 @@ public interface AdminApi {
     })
     @GetMapping(value = Constants.APP_ROOT + "/admins/all", produces = MediaType.APPLICATION_JSON_VALUE)
     List<AdminDto> findAll();
+
+    @Operation(summary = "Récupérer la liste de tous les admins principaux", description = "Cette methode permet de chercher et renvoyer la liste des admins qui existent" + "dans la BDD")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "La liste des admins principaux / Une liste vide")
+    })
+    @GetMapping(value = Constants.APP_ROOT + "/admins/main", produces = MediaType.APPLICATION_JSON_VALUE)
+    Page<AdminDto> findMainAdmins(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    );
+
+    @Operation(summary = "Récupérer la liste de tous les admins d'une entreprise", description = "Cette methode permet de chercher et renvoyer la liste des admins qui existent" + "dans la BDD")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "La liste des admins principaux / Une liste vide")
+    })
+    @GetMapping(value = Constants.APP_ROOT + "/admins/company/{idCompany}", produces = MediaType.APPLICATION_JSON_VALUE)
+    Page<AdminDto> findCompanyAdmins(
+            @PathVariable("idCompany") Long idCompany,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    );
 
     @Operation(summary = "Supprimer un admin par son ID", description = "Cette methode permet de supprimer un admin par ID")
     @ApiResponses(value = {

@@ -3,6 +3,9 @@ package com.parking.services;
 import java.util.List;
 
 import com.parking.dto.ParkingSpaceDto;
+import com.parking.dto.VehicleTypeDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ParkingSpaceService {
 
@@ -12,7 +15,7 @@ public interface ParkingSpaceService {
 
     List<ParkingSpaceDto> findAll();
 
-    List<ParkingSpaceDto> findCompanyParkingSpaces(Long idCompany);
+    Page<ParkingSpaceDto> findByNameLike(Long idCompany,String search, Pageable pageable);
 
     void delete(Long id);
 }

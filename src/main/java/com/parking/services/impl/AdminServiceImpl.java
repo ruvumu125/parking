@@ -5,15 +5,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.parking.dto.AgentDto;
 import com.parking.dto.UserDto;
-import com.parking.model.Admin;
-import com.parking.model.AdminTypeEnum;
-import com.parking.model.User;
-import com.parking.model.UserRoleEnum;
+import com.parking.model.*;
 import com.parking.repository.UserRepository;
 import com.parking.services.MailSenderService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.parking.dto.AdminDto;
@@ -212,6 +212,32 @@ public class AdminServiceImpl implements AdminService {
 		return adminRepository.findAll().stream()
 				.map(AdminDto::fromEntity)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Page<AdminDto> findAllMainAdmins(String search, Pageable pageable) {
+
+		Page<Admin> admins;
+		if (search != null) {
+			admins = adminRepository.findMainAdminsByNameEmailPhoneLike(search, pageable);
+		} else {
+			admins = adminRepository.findAllMainAdmins(pageable);
+		}
+
+		return admins.map(AdminDto::fromEntity);
+	}
+
+	@Override
+	public Page<AdminDto> findCompanyAdmins(Long idCompany, String search, Pageable pageable) {
+
+		Page<Admin> admins;
+		if (search != null) {
+			admins = adminRepository.findCompanyAdminsByNameEmailPhoneLike(idCompany,search, pageable);
+		} else {
+			admins = adminRepository.findCompanyAdmins(idCompany,pageable);
+		}
+
+		return admins.map(AdminDto::fromEntity);
 	}
 
 	@Override

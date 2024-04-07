@@ -1,7 +1,6 @@
 package com.parking.controller.api;
-
-import java.util.List;
-
+import com.parking.dto.CompanyListDto;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +35,11 @@ public interface CompanyApi {
             @ApiResponse(responseCode = "200", description = "La liste des entreprises / Une liste vide")
     })
     @GetMapping(value = Constants.APP_ROOT + "/companies/all", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<CompanyDto> findAll();
+    Page<CompanyListDto> findAllCompanies(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    );
 
     @Operation(summary = "Supprimer une entreprise par son ID", description = "Cette methode permet de supprimer une entreprise par ID")
     @ApiResponses(value = {

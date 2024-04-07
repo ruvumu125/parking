@@ -3,6 +3,9 @@ package com.parking.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.parking.controller.api.ParkingSpaceApi;
@@ -38,8 +41,10 @@ public class ParkingSpaceController implements ParkingSpaceApi {
     }
 
     @Override
-    public List<ParkingSpaceDto> findCompanyParkingSpaces(Long idCompany) {
-        return parkingSpaceService.findCompanyParkingSpaces(idCompany);
+    public Page<ParkingSpaceDto> findByVehiculeTypeName(Long idCompany, String search, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return parkingSpaceService.findByNameLike(idCompany,search,pageable);
     }
 
     @Override

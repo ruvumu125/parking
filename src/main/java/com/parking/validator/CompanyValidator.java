@@ -16,6 +16,7 @@ public class CompanyValidator {
 			errors.add("Veuillez renseigner un nom");
 			errors.add("Veuillez renseigner un numero de telephone");
 			errors.add("Veuillez renseigner une adresse");
+
 			return errors;
 		}
 		
@@ -30,6 +31,8 @@ public class CompanyValidator {
 		if(!StringUtils.hasLength(companyDto.getCompanyAddress())) {
 			errors.add("Veuillez renseigenr une adresse");
 		}
+
+
 		
 		return errors;
 	}

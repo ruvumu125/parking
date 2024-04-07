@@ -1,6 +1,7 @@
 package com.parking.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.parking.model.Admin;
 import com.parking.model.Agent;
 import com.parking.model.Company;
 

@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.parking.dto.VehicleTypeDto;
@@ -68,12 +70,27 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
 	}
 
 	@Override
-	public List<VehicleTypeDto> findAll() {
-		// TODO Auto-generated method stub
-		return vehicleTypeRepository.findAll().stream()
+	public Page<VehicleTypeDto> findByVehiculeTypeName(String search, Pageable pageable) {
+
+		Page<VehicleType> vehicleTypes;
+		if (search != null) {
+			vehicleTypes = vehicleTypeRepository.findByVehiculeTypeNameLike(search, pageable);
+		} else {
+			// If no category is provided, fetch all products
+			vehicleTypes = vehicleTypeRepository.findAllVehiculeType(pageable);
+		}
+
+		return vehicleTypes.map(VehicleTypeDto::fromEntity);
+	}
+
+	@Override
+	public List<VehicleTypeDto> findAvailableVehiculeTypeGivenCompany(Long idCompany) {
+
+		return vehicleTypeRepository.findAvailableVehiculeTypeGivenCompany(idCompany).stream()
 				.map(VehicleTypeDto::fromEntity)
 				.collect(Collectors.toList());
 	}
+
 
 	@Override
 	public void delete(Long id) {

@@ -2,7 +2,12 @@ package com.parking.controller;
 
 import java.util.List;
 
+import com.parking.dto.CompanyListDto;
+import com.parking.dto.VehicleTypeDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.parking.controller.api.CompanyApi;
@@ -32,9 +37,10 @@ public class CompanyController implements CompanyApi {
 	}
 
 	@Override
-	public List<CompanyDto> findAll() {
-		
-		return companyService.findAll();
+	public Page<CompanyListDto> findAllCompanies(String search, int page, int size) {
+
+		Pageable pageable = PageRequest.of(page, size);
+		return companyService.findByNamePhoneAdressAdminLike(search,pageable);
 	}
 
 	@Override

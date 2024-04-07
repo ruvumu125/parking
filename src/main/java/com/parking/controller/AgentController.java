@@ -3,6 +3,9 @@ package com.parking.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.parking.controller.api.AgentApi;
@@ -38,8 +41,10 @@ public class AgentController implements AgentApi {
 	}
 
 	@Override
-	public List<AgentDto> findCompanyAgents(Long idCompany) {
-		return agentService.findCompanyAgents(idCompany);
+	public Page<AgentDto> findCompanyAgents(Long idCompany, String search, int page, int size) {
+
+		Pageable pageable = PageRequest.of(page, size);
+		return agentService.findCompanyAgents(idCompany,search,pageable);
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package com.parking.controller.api;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +37,18 @@ public interface VehicleTypeApi {
             @ApiResponse(responseCode = "200", description = "La liste des types vehicules / Une liste vide")
     })
     @GetMapping(value = Constants.APP_ROOT + "/vehicle_types/all", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<VehicleTypeDto> findAll();
+    Page<VehicleTypeDto> findByVehiculeTypeName(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    );
+
+    @Operation(summary = "Récupérer la liste de tous les types vehicules non encore assigne un prix par une entreprise donnee", description = "Cette methode permet de chercher et renvoyer la liste des types vehicules qui existent" + "dans la BDD")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "La liste de tous les types vehicules non encore assigne un prix par une entreprise donnee / Une liste vide")
+    })
+    @GetMapping(value = Constants.APP_ROOT + "/vehicle_types/company/{idCompany}", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<VehicleTypeDto> findAvailableVehiculeTypeGivenCompany(@PathVariable("idCompany") Long idCompany);
 
     @Operation(summary = "Supprimer un type vehicule par son ID", description = "Cette methode permet de supprimer un type vehicule par ID")
     @ApiResponses(value = {

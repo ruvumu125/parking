@@ -5,15 +5,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.parking.dto.AdminDto;
+import com.parking.dto.CompanyListDto;
+import com.parking.dto.UserDto;
+import com.parking.model.*;
+import com.parking.repository.UserRepository;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.parking.dto.CompanyDto;
 import com.parking.exceptions.ErrorCodes;
 import com.parking.exceptions.InvalidEntityException;
-import com.parking.model.Admin;
-import com.parking.model.Agent;
-import com.parking.model.Company;
 import com.parking.repository.AdminRepository;
 import com.parking.repository.AgentRepository;
 import com.parking.repository.CompanyRepository;
@@ -52,7 +57,7 @@ public class CompanyServiceImpl implements CompanyService {
 					Collections.singletonList("Une autre entreprise avec le meme nom existe deja dans BDD"));
 		}
 
-		if(phoneNumberAlreadyExists(dto.getCompanyPhoneNumber())) {
+		if(companyPhoneNumberAlreadyExists(dto.getCompanyPhoneNumber())) {
 			throw new InvalidEntityException("Une autre entreprise avec le meme numero de telephone existe deja", ErrorCodes.COMPANY_PHONE_NUMBER_ALREADY_EXISTS,
 					Collections.singletonList("Une autre entreprise avec le meme numero de telephone existe deja dans la BDD"));
 		}
@@ -62,10 +67,11 @@ public class CompanyServiceImpl implements CompanyService {
 		);
 	}
 
-	private boolean phoneNumberAlreadyExists(String phoneNumber) {
+	private boolean companyPhoneNumberAlreadyExists(String phoneNumber) {
 		Optional<Company> company = companyRepository.findCompanyByPhoneNumber(phoneNumber);
 		return company.isPresent();
 	}
+
 
 	private boolean companyAlreadyExists(String name) {
 		Optional<Company> company = companyRepository.findCompanyByName(name);
@@ -88,12 +94,19 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public List<CompanyDto> findAll() {
-		// TODO Auto-generated method stub
-		return companyRepository.findAll().stream()
-				.map(CompanyDto::fromEntity)
-				.collect(Collectors.toList());
+	public Page<CompanyListDto> findByNamePhoneAdressAdminLike(String search, Pageable pageable) {
+
+		Page<Company> companies;
+		if (search != null) {
+			companies = companyRepository.findByNamePhoneAdressAdminLike(search, pageable);
+		} else {
+			// If no category is provided, fetch all products
+			companies = companyRepository.findAllCompanies(pageable);
+		}
+
+		return companies.map(CompanyListDto::fromEntity);
 	}
+
 
 	@Override
 	public void delete(Long id) {

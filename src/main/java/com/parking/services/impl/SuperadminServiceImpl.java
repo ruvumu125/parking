@@ -6,13 +6,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.parking.dto.UserDto;
-import com.parking.model.Superadmin;
-import com.parking.model.SuperadminTypeEnum;
-import com.parking.model.User;
-import com.parking.model.UserRoleEnum;
+import com.parking.dto.VehicleTypeDto;
+import com.parking.model.*;
 import com.parking.services.MailSenderService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.parking.dto.SuperadminDto;
@@ -205,11 +205,17 @@ public class SuperadminServiceImpl implements SuperadminService {
 	}
 
 	@Override
-	public List<SuperadminDto> findAll() {
-		
-		return superadminRepository.findAll().stream()
-				.map(SuperadminDto::fromEntity)
-				.collect(Collectors.toList());
+	public Page<SuperadminDto> findByNameEmailPhoneLike(String search, Pageable pageable) {
+
+		Page<Superadmin> superadmins;
+		if (search != null) {
+			superadmins = superadminRepository.findByNameEmailPhoneLike(search, pageable);
+		} else {
+			// If no category is provided, fetch all products
+			superadmins = superadminRepository.findAllSuperAdmins(pageable);
+		}
+
+		return superadmins.map(SuperadminDto::fromEntity);
 	}
 
 	@Override

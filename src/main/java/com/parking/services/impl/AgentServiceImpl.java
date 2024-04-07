@@ -11,6 +11,8 @@ import com.parking.repository.UserRepository;
 import com.parking.services.MailSenderService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.parking.exceptions.EntityNotFoundException;
@@ -201,15 +203,18 @@ public class AgentServiceImpl implements AgentService {
 	}
 
 	@Override
-	public List<AgentDto> findCompanyAgents(Long idCompany) {
+	public Page<AgentDto> findCompanyAgents(Long idCompany, String search, Pageable pageable) {
 
-		if(idCompany == null) {
-			log.error("Company ID is null");
+		Page<Agent> agents;
+		if (search != null) {
+			agents = agentRepository.findByNameEmailPhoneLike(idCompany,search, pageable);
+		} else {
+			agents = agentRepository.findAllCompanyAgents(idCompany,pageable);
 		}
-		return agentRepository.findCompanyAgents(idCompany).stream()
-				.map(AgentDto::fromEntity)
-				.collect(Collectors.toList());
+
+		return agents.map(AgentDto::fromEntity);
 	}
+
 
 	@Override
 	public void delete(Long id) {

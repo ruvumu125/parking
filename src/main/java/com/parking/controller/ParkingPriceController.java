@@ -2,6 +2,9 @@ package com.parking.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.parking.controller.api.ParkingPriceApi;
@@ -36,8 +39,10 @@ public class ParkingPriceController implements ParkingPriceApi {
     }
 
     @Override
-    public List<ParkingPriceDto> findCompanyParkingPrices(Long idCompany) {
-        return parkingPriceService.findCompanyParkingPrices(idCompany);
+    public Page<ParkingPriceDto> findCompanyParkingPrices(Long idCompany, String search, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return parkingPriceService.findByNameLike(idCompany,search,pageable);
     }
 
     @Override

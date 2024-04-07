@@ -10,6 +10,8 @@ import com.parking.dto.ParkingSpaceDto;
 import com.parking.model.ParkingPrice;
 import com.parking.model.ParkingSpace;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.parking.dto.ParkingPriceDto;
@@ -82,15 +84,18 @@ public class ParkingPriceServiceImpl implements ParkingPriceService {
     }
 
     @Override
-    public List<ParkingPriceDto> findCompanyParkingPrices(Long idCompany) {
+    public Page<ParkingPriceDto> findByNameLike(Long idCompany, String search, Pageable pageable) {
 
-        if(idCompany == null) {
-            log.error("Company ID is null");
+        Page<ParkingPrice> parkingPrices;
+        if (search != null) {
+            parkingPrices = parkingPriceRepository.findByNameLike(idCompany,search, pageable);
+        } else {
+            parkingPrices = parkingPriceRepository.findCompanyParkingPrices(idCompany,pageable);
         }
-        return parkingPriceRepository.findCompanyParkingPrices(idCompany).stream()
-                .map(ParkingPriceDto::fromEntity)
-                .collect(Collectors.toList());
+
+        return parkingPrices.map(ParkingPriceDto::fromEntity);
     }
+
 
     @Override
     public void delete(Long id) {

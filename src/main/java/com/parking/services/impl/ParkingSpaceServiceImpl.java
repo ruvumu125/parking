@@ -5,7 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.parking.dto.VehicleTypeDto;
+import com.parking.model.VehicleType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.parking.dto.ParkingSpaceDto;
@@ -76,14 +80,16 @@ public class ParkingSpaceServiceImpl implements ParkingSpaceService {
     }
 
     @Override
-    public List<ParkingSpaceDto> findCompanyParkingSpaces(Long idCompany) {
+    public Page<ParkingSpaceDto> findByNameLike(Long idCompany, String search, Pageable pageable) {
 
-        if(idCompany == null) {
-            log.error("Company ID is null");
+        Page<ParkingSpace> parkingSpaces;
+        if (search != null) {
+            parkingSpaces = parkingSpaceRepository.findByNameLike(idCompany,search, pageable);
+        } else {
+            parkingSpaces = parkingSpaceRepository.findAllParkingSpace(idCompany,pageable);
         }
-        return parkingSpaceRepository.findCompanyParkingSpaces(idCompany).stream()
-                .map(ParkingSpaceDto::fromEntity)
-                .collect(Collectors.toList());
+
+        return parkingSpaces.map(ParkingSpaceDto::fromEntity);
     }
 
     @Override
