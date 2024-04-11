@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.parking.dto.CompanyDto;
 import com.parking.dto.VehicleTypeDto;
 import com.parking.model.VehicleType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +91,14 @@ public class ParkingSpaceServiceImpl implements ParkingSpaceService {
         }
 
         return parkingSpaces.map(ParkingSpaceDto::fromEntity);
+    }
+
+    @Override
+    public List<ParkingSpaceDto> findCompanyParkingSpaces(Long idCompany) {
+
+        return parkingSpaceRepository.findCompanyParkingSpaces(idCompany).stream()
+                .map(ParkingSpaceDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
+import java.util.List;
+
 @RequestMapping("/companies")
 public interface CompanyApi {
 	
@@ -41,10 +43,31 @@ public interface CompanyApi {
             @RequestParam(value = "size", defaultValue = "10") int size
     );
 
+    @Operation(summary = "Récupérer la liste de tous les entreprises n'ayant pas d'admins", description = "Cette methode permet de chercher et renvoyer la liste des entreprises qui existent" + "dans la BDD")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "La liste des entreprises / Une liste vide")
+    })
+    @GetMapping(value = Constants.APP_ROOT + "/companies/companies-with-no-main-admin", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<CompanyDto> findCompaniesWithNoMainAdmin();
+
     @Operation(summary = "Supprimer une entreprise par son ID", description = "Cette methode permet de supprimer une entreprise par ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "L'entreprise a ete supprime")
     })
     @DeleteMapping(value = Constants.APP_ROOT + "/companies/delete/{id}")
     void delete(@PathVariable("id") Long id);
+
+    @Operation(summary = "Activer une entreprise par son ID", description = "Cette methode permet d'activer une entreprise par ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "L'entreprise a ete active")
+    })
+    @PutMapping(value = Constants.APP_ROOT + "/companies/enable/{id}")
+    void enableCompany(@PathVariable("id") Long id);
+
+    @Operation(summary = "Desactiver une entreprise par son ID", description = "Cette methode permet desactiver une entreprise par ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "L'entreprise a ete deactivee")
+    })
+    @PutMapping(value = Constants.APP_ROOT + "/companies/desable/{id}")
+    void desableCompany(@PathVariable("id") Long id);
 }

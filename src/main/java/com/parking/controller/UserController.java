@@ -31,4 +31,15 @@ public class UserController implements UserApi {
 		return userService.findAll();
 	}
 
+	@Override
+	public void enableUser(Long id) {
+		userService.enableUser(id);
+	}
+
+	@Override
+	public void desableUser(Long id) {
+
+		userService.desableUser(id);
+	}
+
 }

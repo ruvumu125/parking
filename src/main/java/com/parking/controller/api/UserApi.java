@@ -29,4 +29,18 @@ public interface UserApi {
     })
     @GetMapping(value = Constants.APP_ROOT + "/users/all", produces = MediaType.APPLICATION_JSON_VALUE)
     List<UserDto> findAll();
+
+    @Operation(summary = "Activer un utilisateur par son ID", description = "Cette methode permet d'activer un utilisateur par ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "L'utilisateur a ete active")
+    })
+    @PutMapping(value = Constants.APP_ROOT + "/users/enable/{id}")
+    void enableUser(@PathVariable("id") Long id);
+
+    @Operation(summary = "Desactiver un utilisateur par son ID", description = "Cette methode permet desactiver un utilisateur par ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "L'utilisateur a ete deactivee")
+    })
+    @PutMapping(value = Constants.APP_ROOT + "/users/desable/{id}")
+    void desableUser(@PathVariable("id") Long id);
 }

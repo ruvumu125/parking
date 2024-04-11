@@ -48,6 +48,11 @@ public class ParkingSpaceController implements ParkingSpaceApi {
     }
 
     @Override
+    public List<ParkingSpaceDto> findCompanyParkingSpaces(Long idCompany) {
+        return parkingSpaceService.findCompanyParkingSpaces(idCompany);
+    }
+
+    @Override
     public void delete(Long id) {
         parkingSpaceService.delete(id);
 

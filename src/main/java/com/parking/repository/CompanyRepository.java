@@ -7,10 +7,12 @@ import com.parking.model.VehicleType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.parking.model.Company;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 	// JPQL query
@@ -25,4 +27,11 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
 	@Query(value = "select c from Company c  where  UPPER(c.companyName) like CONCAT('%',UPPER(?1),'%' ) OR  UPPER(c.companyPhoneNumber) like CONCAT('%',UPPER(?1),'%' ) OR UPPER(c.companyAddress) like CONCAT('%',UPPER(?1),'%' )  order by c.id desc ")
 	Page<Company> findByNamePhoneAdressAdminLike(String search, Pageable pageable);
+
+	@Query(" SELECT c FROM Company c " +
+			" WHERE c.id NOT IN (" +
+			"  SELECT adm.company.id FROM Admin adm " +
+			"  WHERE adm.adminTypeEnum= 'MAIN_ADMIN'" +
+			")")
+	List<Company> findCompaniesWithNoMainAdmin();
 }

@@ -27,6 +27,7 @@ import com.parking.validator.CompanyValidator;
 import com.parking.exceptions.EntityNotFoundException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -122,6 +123,42 @@ public class CompanyServiceImpl implements CompanyService {
 		}
 		companyRepository.deleteById(id);
 		
+	}
+
+	@Override
+	public List<CompanyDto> findCompaniesWithNoMainAdmin() {
+
+		return companyRepository.findCompaniesWithNoMainAdmin().stream()
+				.map(CompanyDto::fromEntity)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	@Transactional
+	public void enableCompany(Long companyId) {
+
+		Optional<Company> optionalCompany = companyRepository.findById(companyId);
+		if (optionalCompany.isPresent()) {
+			Company company = optionalCompany.get();
+			company.setIsCompanyActive(true);
+			companyRepository.save(company);
+		} else {
+			throw new EntityNotFoundException("Aucune entreprise avec l'ID = " +companyId+ " n' a ete trouve dans la BDD",ErrorCodes.COMPANY_NOT_FOUND);
+		}
+	}
+
+	@Override
+	@Transactional
+	public void desableCompany(Long companyId) {
+
+		Optional<Company> optionalCompany = companyRepository.findById(companyId);
+		if (optionalCompany.isPresent()) {
+			Company company = optionalCompany.get();
+			company.setIsCompanyActive(false);
+			companyRepository.save(company);
+		} else {
+			throw new EntityNotFoundException("Aucune entreprise avec l'ID = " +companyId+ " n' a ete trouve dans la BDD",ErrorCodes.COMPANY_NOT_FOUND);
+		}
 	}
 
 }

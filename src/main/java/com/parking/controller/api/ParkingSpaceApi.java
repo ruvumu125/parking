@@ -52,6 +52,13 @@ public interface ParkingSpaceApi {
             @RequestParam(value = "size", defaultValue = "10") int size
     );
 
+    @Operation(summary = "Récupérer la liste de places de parking d'une entreprise", description = "Cette methode permet de chercher et renvoyer la liste des places de parking qui existent" + "dans la BDD")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "La liste des places de parking d'une entreprise / Une liste vide")
+    })
+    @GetMapping(value = Constants.APP_ROOT + "/parking_spaces/company-spaces/{idCompany}", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<ParkingSpaceDto> findCompanyParkingSpaces(@PathVariable("idCompany") Long idCompany);
+
     @Operation(summary = "Supprimer une place de parking par son ID", description = "Cette methode permet de supprimer une place de parking par ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "La place de parking a été supprimé")

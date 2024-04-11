@@ -44,6 +44,21 @@ public class CompanyController implements CompanyApi {
 	}
 
 	@Override
+	public List<CompanyDto> findCompaniesWithNoMainAdmin() {
+		return companyService.findCompaniesWithNoMainAdmin();
+	}
+
+	@Override
+	public void enableCompany(Long id) {
+		companyService.enableCompany(id);
+	}
+
+	@Override
+	public void desableCompany(Long id) {
+		companyService.desableCompany(id);
+	}
+
+	@Override
 	public void delete(Long id) {
 		companyService.delete(id);
 		

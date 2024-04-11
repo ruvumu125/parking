@@ -17,4 +17,10 @@ public interface CompanyService {
 	Page<CompanyListDto> findByNamePhoneAdressAdminLike(String search, Pageable pageable);
 	
 	void delete(Long id);
+
+	List<CompanyDto> findCompaniesWithNoMainAdmin();
+
+	void enableCompany(Long companyId);
+
+	void desableCompany(Long companyId);
 }
