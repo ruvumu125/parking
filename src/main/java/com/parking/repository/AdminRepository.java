@@ -33,6 +33,8 @@ public interface AdminRepository extends JpaRepository<Admin, Long> {
 	@Query(value = "select ad from Admin ad join User u on ad.user.id = u.id where ad.company.id=?1 AND UPPER(u.userFullName) like CONCAT('%',UPPER(?2),'%' ) OR UPPER(u.userEmail) like CONCAT('%',UPPER(?2),'%' ) OR UPPER(u.userPhoneNumber) like CONCAT('%',UPPER(?2),'%' )  order by ad.id desc ")
 	Page<Admin> findCompanyAdminsByNameEmailPhoneLike(Long idCompany,String search, Pageable pageable);
 
+	List<Admin> findAllByCompanyId(Long company_id);
+
 
 
 }

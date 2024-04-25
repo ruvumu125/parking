@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.parking.dto.CompanyDto;
-import com.parking.dto.VehicleTypeDto;
-import com.parking.model.VehicleType;
+import com.parking.model.Agent;
+import com.parking.repository.AgentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,10 +28,12 @@ import lombok.extern.slf4j.Slf4j;
 public class ParkingSpaceServiceImpl implements ParkingSpaceService {
 
     private final ParkingSpaceRepository parkingSpaceRepository;
+    private final AgentRepository agentRepository;
 
     @Autowired
-    public ParkingSpaceServiceImpl(ParkingSpaceRepository parkingSpaceRepository) {
+    public ParkingSpaceServiceImpl(ParkingSpaceRepository parkingSpaceRepository, AgentRepository agentRepository) {
         this.parkingSpaceRepository = parkingSpaceRepository;
+        this.agentRepository = agentRepository;
     }
 
     @Override
@@ -43,11 +44,22 @@ public class ParkingSpaceServiceImpl implements ParkingSpaceService {
             throw new InvalidEntityException("La place du parking n'est pas valide", ErrorCodes.PARKINGSPACE_NOT_VALID, errors);
         }
 
-        if(parkingSpaceAlreadyExists(dto.getName(),dto.getCompany().getId())) {
-            throw new InvalidEntityException("Une autre place de parking avec le meme nom existe deja", ErrorCodes.PARKINGSPACE_ALREADY_EXISTS,
-                    Collections.singletonList("Une autre place de parking avec le meme nom existe deja dans la BDD"));
+        if ((dto.getId() ==null || dto.getId().compareTo(0L) == 0)){
+
+            if(parkingSpaceAlreadyExists(dto.getName(),dto.getCompany().getId())) {
+                throw new InvalidEntityException("Une autreee place de parking avec le meme nom existe deja", ErrorCodes.PARKINGSPACE_ALREADY_EXISTS,
+                        Collections.singletonList("Une autreee place de parking avec le meme nom existe deja dans la BDD"));
+            }
         }
 
+        ParkingSpace existingParkingSpace=parkingSpaceRepository.findParkingSpaceById(dto.getId(),dto.getCompany().getId());
+        if (existingParkingSpace !=null && !existingParkingSpace.getName().equals(dto.getName())){
+
+            if(parkingSpaceAlreadyExists(dto.getName(),dto.getCompany().getId())) {
+                throw new InvalidEntityException("Une autreee place de parking avec le meme nom existe deja", ErrorCodes.PARKINGSPACE_ALREADY_EXISTS,
+                        Collections.singletonList("Une autreee place de parking avec le meme nom existe deja dans la BDD"));
+            }
+        }
         return ParkingSpaceDto.fromEntity(
                 parkingSpaceRepository.save(ParkingSpaceDto.toEntity(dto))
         );
@@ -105,6 +117,12 @@ public class ParkingSpaceServiceImpl implements ParkingSpaceService {
     public void delete(Long id) {
         if(id == null) {
             log.error("Parking Space ID is null");
+        }
+
+        List<Agent> agents = agentRepository.findAllByParkingSpaceId(id);
+        if(!agents.isEmpty()) {
+            throw new InvalidEntityException("Impossible de supprimer cette place de stationnement qui est deja utilisé",
+                    ErrorCodes.PARKINGSPACE_IN_USE);
         }
 
         parkingSpaceRepository.deleteById(id);

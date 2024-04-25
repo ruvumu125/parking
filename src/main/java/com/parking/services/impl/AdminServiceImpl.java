@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.parking.dto.AgentDto;
-import com.parking.dto.UserDto;
+import com.parking.dto.*;
 import com.parking.model.*;
 import com.parking.repository.UserRepository;
 import com.parking.services.MailSenderService;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.parking.dto.AdminDto;
 import com.parking.exceptions.EntityNotFoundException;
 import com.parking.exceptions.ErrorCodes;
 import com.parking.exceptions.InvalidEntityException;
@@ -72,40 +70,45 @@ public class AdminServiceImpl implements AdminService {
 				adminDto.setAdminTypeEnum(AdminTypeEnum.MAIN_ADMIN);
 			}
 
-			User user=new User();
 			String noEncrypted_password=generateCommonLangPassword();
-			user.setUserFullName(adminDto.getUser().getUserFullName());
-			user.setUserEmail(adminDto.getUser().getUserEmail());
-			user.setUserRoleEnum(UserRoleEnum.ADMIN);
-			user.setUserPhoneNumber(adminDto.getUser().getUserPhoneNumber());
-			user.setUserPassword(generateCommonLangPassword());
-			user.setIsUserActive(true);
-			User savedUser = userRepository.save(user);
-			adminDto.setUser(UserDto.fromEntity(savedUser));
+			adminDto.getUser().setUserRoleEnum(UserRoleEnum.ADMIN);
+			adminDto.getUser().setIsUserActive(true);
+			adminDto.getUser().setUserPassword(generateCommonLangPassword());
+
+			UserDto savedUser = UserDto.fromEntity(
+					userRepository.save(UserDto.toEntity(adminDto.getUser()))
+			);
+
+			AdminDto adminDto1 = fromUser(savedUser,adminDto.getAdminTypeEnum(),adminDto.getCompany());
+			AdminDto savedAdmin  = AdminDto.fromEntity(
+					adminRepository.save(AdminDto.toEntity(adminDto1))
+			);
 
 			//send email
 			mailService.sendNewMail(adminDto.getUser().getUserEmail().trim(), "User password", "Dear user this is your password "+noEncrypted_password);
 
-			return AdminDto.fromEntity(
-					adminRepository.save(AdminDto.toEntity(adminDto))
-			);
-
-
+			return savedAdmin;
 		}
 
 		//update section
-		if (!adminDto.getUser().getUserEmail().equals(userEmail(adminDto.getUser().getId())) && userAlreadyExists(adminDto.getUser().getUserEmail())){
+		User existingUser=userRepository.findUserByIdUser(adminDto.getUser().getId());
+		if (existingUser !=null && !existingUser.getUserEmail().equals(adminDto.getUser().getUserEmail())){
 
-			throw new InvalidEntityException("Un autre utilisateur avec le meme email existe deja", ErrorCodes.USER_ALREADY_EXISTS,
-					Collections.singletonList("Un autre utilisateur avec le meme email existe deja dans la BDD"));
+			if (userAlreadyExists(adminDto.getUser().getUserEmail())){
 
+				throw new InvalidEntityException("Un autre utilisateur avec le meme email existe deja", ErrorCodes.USER_ALREADY_EXISTS,
+						Collections.singletonList("Un autre utilisateur avec le meme email existe deja dans la BDD"));
+
+			}
 		}
-		if (!adminDto.getUser().getUserPhoneNumber().equals(userPhoneNumber(adminDto.getUser().getId())) && phoneNumberAlreadyExists(adminDto.getUser().getUserPhoneNumber())){
+		if (existingUser !=null && !existingUser.getUserPhoneNumber().equals(adminDto.getUser().getUserPhoneNumber())){
 
-			throw new InvalidEntityException("Un autre utilisateur avec le meme numero de telephone existe deja", ErrorCodes.USER_PHONE_NUMBER_ALREADY_EXISTS,
-					Collections.singletonList("Un autre utilisateur avec le meme numero de telephone existe deja dans la BDD"));
-
+			if(phoneNumberAlreadyExists(adminDto.getUser().getUserPhoneNumber())) {
+				throw new InvalidEntityException("Un autre utilisateur avec le meme numero de telephone existe deja", ErrorCodes.USER_PHONE_NUMBER_ALREADY_EXISTS,
+						Collections.singletonList("Un autre utilisateur avec le meme numero de telephone existe deja dans la BDD"));
+			}
 		}
+
 		String pswd="";
 		if (!adminDto.getUser().getUserEmail().equals(userEmail(adminDto.getUser().getId())) ){
 
@@ -124,6 +127,9 @@ public class AdminServiceImpl implements AdminService {
 		user.setUserEmail(adminDto.getUser().getUserEmail());
 		user.setUserPhoneNumber(adminDto.getUser().getUserPhoneNumber());
 		user.setUserPassword(pswd);
+		userRepository.save(user);
+
+		AdminDto savedAdmin=AdminDto.fromEntity(adminRepository.save(AdminDto.toEntity(adminDto)));
 
 		if (!adminDto.getUser().getUserEmail().equals(userEmail(adminDto.getUser().getId())) ){
 
@@ -131,10 +137,17 @@ public class AdminServiceImpl implements AdminService {
 			mailService.sendNewMail(adminDto.getUser().getUserEmail().trim(), "Passord", "Dear user, this is your password "+pswd);
 		}
 
-		return AdminDto.fromEntity(
-				adminRepository.save(AdminDto.toEntity(adminDto))
-		);
+		return savedAdmin;
 
+	}
+
+	private AdminDto fromUser(UserDto dto, AdminTypeEnum adminTypeEnum, CompanyDto companyDto) {
+
+		return AdminDto.builder()
+				.user(dto)
+				.adminTypeEnum(adminTypeEnum)
+				.company(companyDto)
+				.build();
 	}
 
 	private boolean phoneNumberAlreadyExists(String phoneNumber) {

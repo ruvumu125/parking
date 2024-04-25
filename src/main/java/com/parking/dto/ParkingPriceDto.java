@@ -5,6 +5,8 @@ import com.parking.model.ParkingPrice;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 public class ParkingPriceDto {
@@ -12,7 +14,7 @@ public class ParkingPriceDto {
     private Long id;
     private CompanyDto companyDto;
     private VehicleTypeDto vehicleTypeDto;
-    private Double price;
+    private BigDecimal price;
 
     public static ParkingPriceDto fromEntity(ParkingPrice parkingPrice) {
         if(parkingPrice == null) {

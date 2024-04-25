@@ -53,19 +53,45 @@ public class CompanyServiceImpl implements CompanyService {
 			throw new InvalidEntityException("L'entreprise n'est pas valide", ErrorCodes.COMPANY_NOT_VALID, errors);
 		}
 
-		if(companyAlreadyExists(dto.getCompanyName())) {
-			throw new InvalidEntityException("Une autre entreprise avec le meme nom existe deja", ErrorCodes.COMPANY_ALREADY_EXISTS,
-					Collections.singletonList("Une autre entreprise avec le meme nom existe deja dans BDD"));
+		if ((dto.getId() ==null || dto.getId().compareTo(0L) == 0)){
+
+			if(companyAlreadyExists(dto.getCompanyName())) {
+				throw new InvalidEntityException("Une autre entreprise avec le meme nom existe deja", ErrorCodes.COMPANY_ALREADY_EXISTS,
+						Collections.singletonList("Une autre entreprise avec le meme nom existe deja dans BDD"));
+			}
+
+			if(companyPhoneNumberAlreadyExists(dto.getCompanyPhoneNumber())) {
+				throw new InvalidEntityException("Une autre entreprise avec le meme numero de telephone existe deja", ErrorCodes.COMPANY_PHONE_NUMBER_ALREADY_EXISTS,
+						Collections.singletonList("Une autre entreprise avec le meme numero de telephone existe deja dans la BDD"));
+			}
+
+			return CompanyDto.fromEntity(
+					companyRepository.save(CompanyDto.toEntity(dto))
+			);
 		}
 
-		if(companyPhoneNumberAlreadyExists(dto.getCompanyPhoneNumber())) {
-			throw new InvalidEntityException("Une autre entreprise avec le meme numero de telephone existe deja", ErrorCodes.COMPANY_PHONE_NUMBER_ALREADY_EXISTS,
-					Collections.singletonList("Une autre entreprise avec le meme numero de telephone existe deja dans la BDD"));
+		Company existingCompany=companyRepository.findCompanyById(dto.getId());
+		if (existingCompany !=null && !existingCompany.getCompanyName().equals(dto.getCompanyName())){
+
+			if(companyAlreadyExists(dto.getCompanyName())) {
+				throw new InvalidEntityException("Une autre entreprise avec le meme nom existe deja", ErrorCodes.COMPANY_ALREADY_EXISTS,
+						Collections.singletonList("Une autre entreprise avec le meme nom existe deja dans BDD"));
+			}
 		}
-		
+
+		if (existingCompany !=null && !existingCompany.getCompanyPhoneNumber().equals(dto.getCompanyPhoneNumber())){
+
+			if(companyPhoneNumberAlreadyExists(dto.getCompanyPhoneNumber())) {
+				throw new InvalidEntityException("Une autre entreprise avec le meme numero de telephone existe deja", ErrorCodes.COMPANY_PHONE_NUMBER_ALREADY_EXISTS,
+						Collections.singletonList("Une autre entreprise avec le meme numero de telephone existe deja dans la BDD"));
+			}
+		}
+
 		return CompanyDto.fromEntity(
 				companyRepository.save(CompanyDto.toEntity(dto))
 		);
+
+
 	}
 
 	private boolean companyPhoneNumberAlreadyExists(String phoneNumber) {
@@ -115,9 +141,8 @@ public class CompanyServiceImpl implements CompanyService {
 		if(id == null) {
 			log.error("Company ID is null");
 		}
-		List<Admin> admin = adminRepository.findAllById(id);
-		List<Agent> agent = agentRepository.findAllById(id);
-		if(!admin.isEmpty() || !agent.isEmpty()) {
+		List<Admin> admin = adminRepository.findAllByCompanyId(id);
+		if(!admin.isEmpty()) {
 			throw new InvalidEntityException("Impossible de supprimer cette entreprise qui est deja utilisé", 
 					ErrorCodes.COMPANY_ALREADY_IN_USE);
 		}

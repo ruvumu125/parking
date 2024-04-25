@@ -15,6 +15,9 @@ import com.parking.model.ParkingSpace;
 
 public interface ParkingSpaceRepository extends JpaRepository<ParkingSpace, Long> {
 
+    @Query(value = "select p from ParkingSpace p where p.id = :id AND p.company.id =:company_id")
+    ParkingSpace findParkingSpaceById(@Param("id") Long id,@Param("company_id") Long company_id);
+
     @Query(value = "select p from ParkingSpace p where p.name = :name AND p.company.id =:company_id")
     Optional<ParkingSpace> findParkingSpaceByName(@Param("name") String name,@Param("company_id") Long company_id);
 

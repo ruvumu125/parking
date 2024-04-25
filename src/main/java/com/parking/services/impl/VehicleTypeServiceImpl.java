@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.parking.exceptions.InvalidOperationException;
+import com.parking.model.ParkingPrice;
+import com.parking.repository.ParkingPriceRepository;
+import com.parking.repository.ParkingTicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 public class VehicleTypeServiceImpl implements VehicleTypeService {
 	
 	private final VehicleTypeRepository vehicleTypeRepository;
+	private final ParkingPriceRepository parkingPriceRepository;
 	
 	@Autowired
-	public VehicleTypeServiceImpl(VehicleTypeRepository vehicleTypeRepository) {
+	public VehicleTypeServiceImpl(VehicleTypeRepository vehicleTypeRepository, ParkingPriceRepository parkingPriceRepository) {
 		this.vehicleTypeRepository = vehicleTypeRepository;
+		this.parkingPriceRepository = parkingPriceRepository;
 	}
 	
 	@Override
@@ -40,14 +46,31 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
 			throw new InvalidEntityException("Le vehicule n'est pas valide", ErrorCodes.VEHICLETYPE_NOT_VALID, errors);
 		}
 
-		if(vehicleTypeAlreadyExists(dto.getVehiculeTypeName())) {
-			throw new InvalidEntityException("Un autre vehicule avec le meme nom existe deja", ErrorCodes.VEHICLETYPE_ALREADY_EXISTS,
-					Collections.singletonList("Un autre vehicule avec le meme nom existe deja dans la BDD"));
+		if ((dto.getId() ==null || dto.getId().compareTo(0L) == 0)){
+
+			if(vehicleTypeAlreadyExists(dto.getVehiculeTypeName())) {
+				throw new InvalidEntityException("Un autre type de vehicule avec le meme nom existe deja", ErrorCodes.VEHICLETYPE_ALREADY_EXISTS,
+						Collections.singletonList("Un autre type de vehicule avec le meme nom existe deja dans la BDD"));
+			}
+			return VehicleTypeDto.fromEntity(
+					vehicleTypeRepository.save(VehicleTypeDto.toEntity(dto))
+			);
+		}
+
+		VehicleType existingVehicleType=vehicleTypeRepository.findVehicleTypeById(dto.getId());
+		if (existingVehicleType !=null && !existingVehicleType.getVehiculeTypeName().equals(dto.getVehiculeTypeName())){
+
+			if(vehicleTypeAlreadyExists(dto.getVehiculeTypeName())) {
+				throw new InvalidEntityException("Un autre type de vehicule avec le meme nom existe deja", ErrorCodes.VEHICLETYPE_ALREADY_EXISTS,
+						Collections.singletonList("Un autre type de vehicule avec le meme nom existe deja dans la BDD"));
+			}
 		}
 
 		return VehicleTypeDto.fromEntity(
 				vehicleTypeRepository.save(VehicleTypeDto.toEntity(dto))
 		);
+
+
 	}
 
 	private boolean vehicleTypeAlreadyExists(String name) {
@@ -96,6 +119,12 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
 	public void delete(Long id) {
 		if(id == null) {
 			log.error("Vehicle type ID is null");
+		}
+
+		List<ParkingPrice> parkingPrices = parkingPriceRepository.findAllByVehicleTypeId(id);
+		if(!parkingPrices.isEmpty()) {
+			throw new InvalidOperationException("Impossible de supprimer ce type de vehicule qui est deja utilise",
+					ErrorCodes.VEHICLETYPE_IN_USE);
 		}
 		
 		vehicleTypeRepository.deleteById(id);

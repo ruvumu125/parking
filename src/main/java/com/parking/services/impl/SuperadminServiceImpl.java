@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.parking.dto.UserDto;
-import com.parking.dto.VehicleTypeDto;
+import com.parking.dto.*;
 import com.parking.model.*;
 import com.parking.services.MailSenderService;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.parking.dto.SuperadminDto;
 import com.parking.exceptions.ErrorCodes;
 import com.parking.exceptions.InvalidEntityException;
 import com.parking.repository.SuperadminRepository;
@@ -72,42 +70,48 @@ public class SuperadminServiceImpl implements SuperadminService {
 				superadminDto.setSuperadminTypeEnum(SuperadminTypeEnum.MAIN_SUPERADMIN);
 			}
 
-			User user=new User();
 			String noEncrypted_password=generateCommonLangPassword();
-			user.setUserFullName(superadminDto.getUser().getUserFullName());
-			user.setUserEmail(superadminDto.getUser().getUserEmail());
-			user.setUserRoleEnum(UserRoleEnum.SUPERADMIN);
-			user.setUserPhoneNumber(superadminDto.getUser().getUserPhoneNumber());
-			user.setUserPassword(noEncrypted_password);
-			user.setIsUserActive(true);
-			User savedUser = userRepository.save(user);
-			superadminDto.setUser(UserDto.fromEntity(savedUser));
+			superadminDto.getUser().setIsUserActive(true);
+			superadminDto.getUser().setUserPassword(noEncrypted_password);
+			superadminDto.getUser().setUserRoleEnum(UserRoleEnum.SUPERADMIN);
+
+			UserDto savedUser = UserDto.fromEntity(
+					userRepository.save(UserDto.toEntity(superadminDto.getUser()))
+			);
+
+			SuperadminDto superadminDto1 = fromUser(savedUser,superadminDto.getSuperadminTypeEnum());
+			SuperadminDto savedSuperAdmin  = SuperadminDto.fromEntity(
+					superadminRepository.save(SuperadminDto.toEntity(superadminDto1))
+			);
+
 
 			//send email
 			mailService.sendNewMail(superadminDto.getUser().getUserEmail().trim(), "User password", "Dear user this is your password "+noEncrypted_password);
 
-			return SuperadminDto.fromEntity(
-					superadminRepository.save(SuperadminDto.toEntity(superadminDto))
-			);
+			return savedSuperAdmin;
 
 		}
 
 		//update section
-		if (!superadminDto.getUser().getUserEmail().equals(userEmail(superadminDto.getUser().getId())) && userAlreadyExists(superadminDto.getUser().getUserEmail())){
+		User existingUser=userRepository.findUserByIdUser(superadminDto.getUser().getId());
+		if (existingUser !=null && !existingUser.getUserEmail().equals(superadminDto.getUser().getUserEmail())){
 
-			throw new InvalidEntityException("Un autre utilisateur avec le meme email existe deja", ErrorCodes.USER_ALREADY_EXISTS,
-					Collections.singletonList("Un autre utilisateur avec le meme email existe deja dans la BDDp"));
+			if (userAlreadyExists(superadminDto.getUser().getUserEmail())){
+				throw new InvalidEntityException("Un autre utilisateur avec le meme email existe deja", ErrorCodes.USER_ALREADY_EXISTS,
+						Collections.singletonList("Un autre utilisateur avec le meme email existe deja dans la BDD"));
 
+			}
 		}
-		if (!superadminDto.getUser().getUserPhoneNumber().equals(userPhoneNumber(superadminDto.getUser().getId())) && phoneNumberAlreadyExists(superadminDto.getUser().getUserPhoneNumber())){
 
-			throw new InvalidEntityException("Un autre utilisateur avec le meme numero de telephone existe deja", ErrorCodes.USER_PHONE_NUMBER_ALREADY_EXISTS,
-					Collections.singletonList("Un autre utilisateur avec le meme numero de telephone existe deja dans la BDD"));
+		if (existingUser !=null && !existingUser.getUserPhoneNumber().equals(superadminDto.getUser().getUserPhoneNumber())){
 
+			if(phoneNumberAlreadyExists(superadminDto.getUser().getUserPhoneNumber())) {
+				throw new InvalidEntityException("Un autre utilisateur avec le meme numero de telephone existe deja", ErrorCodes.USER_PHONE_NUMBER_ALREADY_EXISTS,
+						Collections.singletonList("Un autre utilisateur avec le meme numero de telephone existe deja dans la BDD"));
+			}
 		}
 		String pswd="";
 		if (!superadminDto.getUser().getUserEmail().equals(userEmail(superadminDto.getUser().getId())) ){
-
 			//change existing password and send new password to new user
 			pswd=generateCommonLangPassword();
 		}
@@ -115,8 +119,6 @@ public class SuperadminServiceImpl implements SuperadminService {
 			//get existing password
 			pswd=userRepository.findUserByIdUser(superadminDto.getUser().getId()).getUserPassword();
 		}
-
-
 		Superadmin superadmin=superadminRepository.findSuperAdminById(superadminDto.getId());
 		User user=superadmin.getUser();
 		user.setUserFullName(superadminDto.getUser().getUserFullName());
@@ -124,15 +126,23 @@ public class SuperadminServiceImpl implements SuperadminService {
 		user.setUserPhoneNumber(superadminDto.getUser().getUserPhoneNumber());
 		user.setUserPassword(pswd);
 
-		if (!superadminDto.getUser().getUserEmail().equals(userEmail(superadminDto.getUser().getId())) ){
+		userRepository.save(user);
+		SuperadminDto savedSuperAdmin=SuperadminDto.fromEntity(superadminRepository.save(SuperadminDto.toEntity(superadminDto)));
 
+		if (!superadminDto.getUser().getUserEmail().equals(userEmail(superadminDto.getUser().getId())) ){
 			//send email
 			mailService.sendNewMail(superadminDto.getUser().getUserEmail().trim(), "Passord", "Dear user, this is your password "+pswd);
 		}
 		
-		return SuperadminDto.fromEntity(
-				superadminRepository.save(SuperadminDto.toEntity(superadminDto))
-		);
+		return savedSuperAdmin;
+	}
+
+	private SuperadminDto fromUser(UserDto dto,SuperadminTypeEnum superadminTypeEnum) {
+
+		return SuperadminDto.builder()
+				.user(dto)
+				.superadminTypeEnum(superadminTypeEnum)
+				.build();
 	}
 
 	private boolean phoneNumberAlreadyExists(String phoneNumber) {

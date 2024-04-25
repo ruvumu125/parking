@@ -61,45 +61,47 @@ public class AgentServiceImpl implements AgentService {
 						Collections.singletonList("Un autre utilisateur avec le meme numero de telephone existe deja dans la BDD"));
 			}
 
-			//save user
-			User user=new User();
 			String noEncrypted_password=generateCommonLangPassword();
-			user.setUserFullName(agentDto.getUser().getUserFullName());
-			user.setUserEmail(agentDto.getUser().getUserEmail());
-			user.setUserRoleEnum(UserRoleEnum.AGENT);
-			user.setUserPhoneNumber(agentDto.getUser().getUserPhoneNumber());
-			user.setUserPassword(generateCommonLangPassword());
-			user.setIsUserActive(true);
-			User savedUser = userRepository.save(user);
-			agentDto.setUser(UserDto.fromEntity(savedUser));
+			agentDto.getUser().setUserRoleEnum(UserRoleEnum.AGENT);
+			agentDto.getUser().setIsUserActive(true);
+			agentDto.getUser().setUserPassword(generateCommonLangPassword());
 
-			//send email
-//			mailService.sendNewMail(agentDto.getUser().getUserEmail().trim(), "User password", "Dear user this is your password "+noEncrypted_password);
-
-			return AgentDto.fromEntity(
-					agentRepository.save(AgentDto.toEntity(agentDto))
+			UserDto savedUser = UserDto.fromEntity(
+					userRepository.save(UserDto.toEntity(agentDto.getUser()))
 			);
 
+			AgentDto agentDto1 = fromUser(savedUser,agentDto.getCompany(),agentDto.getParkingSpace());
+			AgentDto savedAgent = AgentDto.fromEntity(
+					agentRepository.save(AgentDto.toEntity(agentDto1))
+			);
 
+            //send email
+			mailService.sendNewMail(agentDto.getUser().getUserEmail().trim(), "User password", "Dear user this is your password "+noEncrypted_password);
+
+			return savedAgent;
 		}
 
 		//update section
-		if (!agentDto.getUser().getUserEmail().equals(userEmail(agentDto.getUser().getId())) && userAlreadyExists(agentDto.getUser().getUserEmail())){
+		User existingUser=userRepository.findUserByIdUser(agentDto.getUser().getId());
+		if (existingUser !=null && !existingUser.getUserEmail().equals(agentDto.getUser().getUserEmail())){
 
-			throw new InvalidEntityException("Un autre utilisateur avec le meme email existe deja", ErrorCodes.USER_ALREADY_EXISTS,
-					Collections.singletonList("Un autre utilisateur avec le meme email existe deja dans la BDD"));
+			if (userAlreadyExists(agentDto.getUser().getUserEmail())){
+				throw new InvalidEntityException("Un autre utilisateur avec le meme email existe deja", ErrorCodes.USER_ALREADY_EXISTS,
+						Collections.singletonList("Un autre utilisateur avec le meme email existe deja dans la BDD"));
 
+			}
 		}
-		if (!agentDto.getUser().getUserPhoneNumber().equals(userPhoneNumber(agentDto.getUser().getId())) && phoneNumberAlreadyExists(agentDto.getUser().getUserPhoneNumber())){
+		if (existingUser !=null && !existingUser.getUserPhoneNumber().equals(agentDto.getUser().getUserPhoneNumber())){
 
-			throw new InvalidEntityException("Un autre utilisateur avec le meme numero de telephone existe deja", ErrorCodes.USER_PHONE_NUMBER_ALREADY_EXISTS,
-					Collections.singletonList("Un autre utilisateur avec le meme numero de telephone existe deja dans la BDD"));
-
+			if(phoneNumberAlreadyExists(agentDto.getUser().getUserPhoneNumber())) {
+				throw new InvalidEntityException("Un autre utilisateur avec le meme numero de telephone existe deja", ErrorCodes.USER_PHONE_NUMBER_ALREADY_EXISTS,
+						Collections.singletonList("Un autre utilisateur avec le meme numero de telephone existe deja dans la BDD"));
+			}
 		}
+
 		String pswd="";
 		if (!agentDto.getUser().getUserEmail().equals(userEmail(agentDto.getUser().getId())) ){
 
-			//change existing password and send new password to new user
 			pswd=generateCommonLangPassword();
 		}
 		else{
@@ -114,16 +116,26 @@ public class AgentServiceImpl implements AgentService {
 		user.setUserEmail(agentDto.getUser().getUserEmail());
 		user.setUserPhoneNumber(agentDto.getUser().getUserPhoneNumber());
 		user.setUserPassword(pswd);
+		userRepository.save(user);
 
-//		if (!agentDto.getUser().getUserEmail().equals(userEmail(agentDto.getUser().getId())) ){
-//
-//			//send email
-//			mailService.sendNewMail(agentDto.getUser().getUserEmail().trim(), "Passord", "Dear user, this is your password "+pswd);
-//		}
+		AgentDto savedAgent=AgentDto.fromEntity(agentRepository.save(AgentDto.toEntity(agentDto)));
 
-		return AgentDto.fromEntity(
-				agentRepository.save(AgentDto.toEntity(agentDto))
-		);
+		if (!agentDto.getUser().getUserEmail().equals(userEmail(agentDto.getUser().getId())) ){
+
+			//send email
+			mailService.sendNewMail(agentDto.getUser().getUserEmail().trim(), "Passord", "Dear user, this is your password "+pswd);
+		}
+
+		return savedAgent;
+	}
+
+	private AgentDto fromUser(UserDto dto,CompanyDto companyDto,ParkingSpaceDto parkingSpaceDto) {
+
+		return AgentDto.builder()
+				.user(dto)
+				.company(companyDto)
+				.parkingSpace(parkingSpaceDto)
+				.build();
 	}
 
 	private boolean phoneNumberAlreadyExists(String phoneNumber) {

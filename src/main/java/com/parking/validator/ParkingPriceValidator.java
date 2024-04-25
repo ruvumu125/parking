@@ -1,5 +1,6 @@
 package com.parking.validator;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class ParkingPriceValidator {
         if(parkingPriceDto.getPrice() == null) {
             errors.add("Veuiller renseigner un prix");
         }
-        if(parkingPriceDto.getPrice() == null || parkingPriceDto.getPrice().compareTo((double) 0) == 0) {
+        if(parkingPriceDto.getPrice() == null || parkingPriceDto.getPrice().compareTo(BigDecimal.valueOf(0)) == 0) {
             errors.add("Le prix doit etere superieur a zero");
         }
         return errors;

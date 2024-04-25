@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 	// JPQL query
+	@Query(value = "select c from Company c where c.id = :id")
+	Company findCompanyById(@Param("id") Long id);
+
 	@Query(value = "select c from Company c where c.companyName = :name")
 	Optional<Company> findCompanyByName(@Param("name") String name);
 	

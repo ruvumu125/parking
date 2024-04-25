@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "parking_prices")
 @Data
@@ -26,5 +28,5 @@ public class ParkingPrice extends AbstractEntity {
     private VehicleType vehicleType;
 
     @Column(name = "price")
-    private Double price;
+    private BigDecimal price;
 }
