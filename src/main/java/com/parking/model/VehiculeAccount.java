@@ -25,7 +25,7 @@ public class VehiculeAccount extends AbstractEntity {
     @Column(name = "opendate",updatable = false)
     private Instant openDate;
 
-    @Lob
+
     @Column(columnDefinition = "bytea",name = "qrcodeimage",updatable = false)
     private byte[] qrCodeImage;
 
