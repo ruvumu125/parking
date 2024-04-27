@@ -1,9 +1,7 @@
 package com.parking.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.parking.model.Account;
+import com.parking.model.VehiculeAccount;
 
-import com.parking.model.Vehicle;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +9,7 @@ import java.time.Instant;
 
 @Data
 @Builder
-public class AccountDto {
+public class VehiculeAccountDto {
 
     private Long id;
     private String accountNumber;
@@ -20,12 +18,12 @@ public class AccountDto {
     private String qrCodeString;
     private Instant openDate;
 
-    public static AccountDto fromEntity(Account account) {
+    public static VehiculeAccountDto fromEntity(VehiculeAccount account) {
         if(account == null) {
             return null;
         }
 
-        return AccountDto.builder()
+        return VehiculeAccountDto.builder()
                 .id(account.getId())
                 .accountNumber(account.getAccountNumber())
                 .vehicle(VehicleDto.fromEntity(account.getVehicle()))
@@ -35,12 +33,12 @@ public class AccountDto {
                 .build();
     }
 
-    public static Account toEntity(AccountDto accountDto) {
+    public static VehiculeAccount toEntity(VehiculeAccountDto accountDto) {
         if(accountDto == null) {
             return null;
         }
 
-        Account account = new Account();
+        VehiculeAccount account = new VehiculeAccount();
         account.setId(accountDto.getId());
         account.setAccountNumber(accountDto.getAccountNumber());
         account.setVehicle(VehicleDto.toEntity(accountDto.getVehicle()));

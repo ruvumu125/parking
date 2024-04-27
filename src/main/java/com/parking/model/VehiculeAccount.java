@@ -9,11 +9,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "vehicule_accounts")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Account extends AbstractEntity {
+public class VehiculeAccount extends AbstractEntity {
 
     @Column(name = "accountnumber",updatable = false)
     private String accountNumber;

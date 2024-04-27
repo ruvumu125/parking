@@ -5,7 +5,6 @@ import com.parking.model.Deposit;
 import com.parking.model.Payment;
 import com.parking.model.Transaction;
 import com.parking.model.TransactionTypeEnum;
-import jakarta.persistence.OneToMany;
 import lombok.Builder;
 import lombok.Data;
 
@@ -19,7 +18,7 @@ public class TransactionDto {
 
     private Long id;
     private String transactionCode;
-    private AccountDto account;
+    private VehiculeAccountDto account;
     private TransactionTypeEnum transactionType;
     private BigDecimal transactionAmount;
     private Instant transactionDate;
@@ -37,7 +36,7 @@ public class TransactionDto {
         return TransactionDto.builder()
                 .id(transaction.getId())
                 .transactionCode(transaction.getTransactionCode())
-                .account(AccountDto.fromEntity(transaction.getAccount()))
+                .account(VehiculeAccountDto.fromEntity(transaction.getAccount()))
                 .transactionType(transaction.getTransactionType())
                 .transactionAmount(transaction.getTransactionAmount())
                 .transactionDate(transaction.getTransactionDate())
@@ -52,7 +51,7 @@ public class TransactionDto {
         Transaction transaction=new Transaction();
         transaction.setId(transactionDto.getId());
         transaction.setTransactionCode(transactionDto.getTransactionCode());
-        transaction.setAccount(AccountDto.toEntity(transactionDto.getAccount()));
+        transaction.setAccount(VehiculeAccountDto.toEntity(transactionDto.getAccount()));
         transaction.setTransactionType(transactionDto.getTransactionType());
         transaction.setTransactionAmount(transactionDto.getTransactionAmount());
         transaction.setTransactionDate(transactionDto.getTransactionDate());

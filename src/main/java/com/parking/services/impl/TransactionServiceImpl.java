@@ -29,10 +29,10 @@ public class TransactionServiceImpl implements TransactionService {
     private final PaymentRepository paymentRepository;
     private final DepositRepository depositRepository;
     private final ParkingTicketRepository parkingTicketRepository;
-    private final AccountRepository accountRepository;
+    private final VehiculeAccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
 
-    public TransactionServiceImpl(PaymentRepository paymentRepository, DepositRepository depositRepository, ParkingTicketRepository parkingTicketRepository, AccountRepository accountRepository, TransactionRepository transactionRepository) {
+    public TransactionServiceImpl(PaymentRepository paymentRepository, DepositRepository depositRepository, ParkingTicketRepository parkingTicketRepository, VehiculeAccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.paymentRepository = paymentRepository;
         this.depositRepository = depositRepository;
         this.parkingTicketRepository = parkingTicketRepository;
@@ -154,7 +154,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private boolean isAccountExist(Long id) {
-        Optional<Account> account = accountRepository.findById(id);
+        Optional<VehiculeAccount> account = accountRepository.findById(id);
         return account.isPresent();
     }
 

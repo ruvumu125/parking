@@ -22,5 +22,5 @@ public class Vehicle extends AbstractEntity {
     @OneToOne(fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             mappedBy = "vehicle")
-    private Account account;
+    private VehiculeAccount account;
 }

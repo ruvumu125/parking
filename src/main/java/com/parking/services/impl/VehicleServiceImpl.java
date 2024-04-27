@@ -1,14 +1,11 @@
 package com.parking.services.impl;
 
-import com.parking.dto.AccountDto;
-import com.parking.dto.CompanyListDto;
+import com.parking.dto.VehiculeAccountDto;
 import com.parking.dto.VehicleDto;
 import com.parking.exceptions.ErrorCodes;
 import com.parking.exceptions.InvalidEntityException;
-import com.parking.model.Company;
 import com.parking.model.Vehicle;
-import com.parking.model.VehicleType;
-import com.parking.repository.AccountRepository;
+import com.parking.repository.VehiculeAccountRepository;
 import com.parking.repository.VehicleRepository;
 import com.parking.services.QRCodeService;
 import com.parking.services.VehicleService;
@@ -31,11 +28,11 @@ import java.time.Instant;
 public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
-    private final AccountRepository accountRepository;
+    private final VehiculeAccountRepository accountRepository;
     private final QRCodeService qrCodeService;
 
     @Autowired
-    public VehicleServiceImpl(VehicleRepository vehicleRepository, AccountRepository accountRepository, QRCodeService qrCodeService) {
+    public VehicleServiceImpl(VehicleRepository vehicleRepository, VehiculeAccountRepository accountRepository, QRCodeService qrCodeService) {
         this.vehicleRepository = vehicleRepository;
         this.accountRepository = accountRepository;
         this.qrCodeService = qrCodeService;
@@ -60,8 +57,8 @@ public class VehicleServiceImpl implements VehicleService {
                     vehicleRepository.save(VehicleDto.toEntity(dto))
             );
 
-            AccountDto accountDto = fromVehicule(savedVehicule,generateAccountNumber(10));
-            accountRepository.save(AccountDto.toEntity(accountDto));
+            VehiculeAccountDto accountDto = fromVehicule(savedVehicule,generateAccountNumber(10));
+            accountRepository.save(VehiculeAccountDto.toEntity(accountDto));
 
             return savedVehicule;
 
@@ -83,7 +80,7 @@ public class VehicleServiceImpl implements VehicleService {
         );
     }
 
-    private AccountDto fromVehicule(VehicleDto dto,String numero_compte) {
+    private VehiculeAccountDto fromVehicule(VehicleDto dto, String numero_compte) {
         String qrCodeText=numero_compte+generateUniqueId();
         byte[] qrCodeImage = null;
         try {
@@ -91,7 +88,7 @@ public class VehicleServiceImpl implements VehicleService {
         } catch (Exception e) {
             // Handle exception
         }
-        return AccountDto.builder()
+        return VehiculeAccountDto.builder()
                 .accountNumber(numero_compte)
                 .vehicle(dto)
                 .qrCodeImage(qrCodeImage)

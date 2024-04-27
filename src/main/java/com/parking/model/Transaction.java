@@ -2,7 +2,6 @@ package com.parking.model;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -22,7 +21,7 @@ public class Transaction extends AbstractEntity {
 
     @ManyToOne
     @JoinColumn(name = "account_id")
-    private Account account;
+    private VehiculeAccount account;
 
     @Enumerated(EnumType.STRING)
     private TransactionTypeEnum transactionType;
